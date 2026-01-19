@@ -1,8 +1,10 @@
 ## TITLE:  Real-Time Product Review Quality Predictor
 
 ## Project Overview
-This project predicts whether a product review is high quality or low quality using review text and metadata.  
-The system performs real-time inference and visualizes results through a Streamlit dashboard.
+This project predicts the quality of product reviews in real time using machine learning.  
+It demonstrates dynamic data ingestion (new reviews added via API or UI), feature extraction, training, and real-time inference.  
+The model predicts whether a review is `high_quality` or `low_quality` based on review text and metadata(rating, helpful votes, verified purchase).
+
 
 
 ## Problem Statement
@@ -24,17 +26,30 @@ The project uses FakeStoreAPI as a dynamic data source.
 
 This fulfills the requirement of using a dynamic data source.
 
-
 ## Dataset Description
 Because FakeStoreAPI does not provide real reviews, synthetic but realistic review data is generated.
 
-## Features:
-1. **Text** -Text content of the review
-2. **Rating** - Rating given by the user
-3. **review_date** - Date when the review was submitted
-4. **Verified_purchase** - Indicates whether the purchase is verified
-5. **helpful_votes** - Total number of helpful votes
-6. **label** - Review quality category (High Quality / Low Quality)
+## Features
+
+  * Dynamic Data Source:
+  - Initial dataset generated from FakeStoreAPI (`create_dataset.py`).  
+  - Users can submit new reviews through the Streamlit UI (`app.py`).  
+  - Dataset grows dynamically with each new review.
+
+  * Prediction Target: 
+  - Review quality: `high_quality` or `low_quality`.
+
+  * Pipelines: 
+
+  - Feature pipeline: TF-IDF for text + metadata features  
+  - Training pipeline: Logistic Regression model (`train_model.py`)  
+  - Inference pipeline: Real-time prediction through the UI
+
+  * User Interface:
+  - Streamlit-based UI for entering reviews  
+  - Shows dataset size, predictions, and confidence scores  
+  - Supports example predictions for demonstration
+
 
 **Labeling Rule**:
 A review is labeled High Quality if:
@@ -51,25 +66,21 @@ Otherwise, it is labeled Low Quality.
 * Binary classification output
 
 
-## Technologies Used
-* Python
-* Pandas
-* Scikit-learn
-* TF-IDF Vectorizer
-* Logistic Regression
-* Streamlit
-* Matplotlib
+ ## How to Run
 
+ 1. Generate the initial dataset:
+     python create_dataset.py
 
+ 2. Train the model:
+    python train_model.py
 
-## How to Run the Project
-* Install dependencies:
-pip install  requirements.txt
-* Run the Create Dataset file
-python create_dataset.py
-and
-* Run the application:
-streamlit run app.py
+ 3. Run the Streamlit UI for real-time predictions:
+    streamlit run app.py
 
+ 4. Submit new reviews through the UI:
 
+ - Enter review text, rating, helpful votes, and verified purchase.
 
+ - Click Submit Review and Predict Quality to append the review to the dataset and get the prediction immediately.
+
+ ## UI LINK: https://scalablemachinelearningproject.streamlit.app
