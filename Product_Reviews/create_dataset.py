@@ -4,38 +4,41 @@ import random
 from datetime import datetime, timedelta
 import os
 
-# Create dataset folder if it doesn't exist
+# Create dataset directory if it doesn't exist
 os.makedirs("reviews_dataset", exist_ok=True)
 
-# Fetch products from FakeStoreAPI
-url = "https://fakestoreapi.com/products"
-products = requests.get(url).json()
+DATASET_PATH = "reviews_dataset/review_quality_dataset.csv"
 
-data = []
+# Fetch product data dynamically at runtime
+API_URL = "https://fakestoreapi.com/products"
+products = requests.get(API_URL).json()
 
-# Generate synthetic reviews
+new_records = []
+
+# Generate dynamic reviews for each product
 for product in products:
     product_title = product["title"]
 
-    # Create 50 reviews per product
-    for i in range(50):
+    # Generate a small batch each run (simulates live incoming data)
+    for _ in range(10):
         rating = round(random.uniform(1, 5), 1)
         helpful_votes = random.randint(0, 20)
         verified_purchase = random.choice([True, False])
-        review_date = datetime.now() - timedelta(days=random.randint(0, 365))
+        review_date = datetime.now() - timedelta(days=random.randint(0, 30))
 
         review_text = (
-            f"This is a customer review for {product_title}. "
-            f"The product was rated {rating} stars."
+            f"This is a live customer review for {product_title}. "
+            f"The product received a rating of {rating} stars."
         )
 
-        # Review quality rule (GROUND TRUTH)
-        if rating >= 4 and helpful_votes >= 5 and verified_purchase:
-            label = "high_quality"
-        else:
-            label = "low_quality"
+        # Label generation (ground truth logic)
+        label = (
+            "high_quality"
+            if rating >= 4 and helpful_votes >= 5 and verified_purchase
+            else "low_quality"
+        )
 
-        data.append({
+        new_records.append({
             "text": review_text,
             "rating": rating,
             "review_date": review_date,
@@ -44,12 +47,20 @@ for product in products:
             "label": label
         })
 
-# Convert to DataFrame
-df = pd.DataFrame(data)
+# Convert new batch to DataFrame
+df_new = pd.DataFrame(new_records)
 
-# Save dataset
-df.to_csv("reviews_dataset/review_quality_dataset.csv", index=False)
+# Append to existing dataset if it exists
+if os.path.exists(DATASET_PATH):
+    df_existing = pd.read_csv(DATASET_PATH)
+    df_final = pd.concat([df_existing, df_new], ignore_index=True)
+else:
+    df_final = df_new
 
-print("Review quality dataset created successfully!")
-print(df.head())
-print("\nDataset size:", len(df))
+# Save updated dataset
+df_final.to_csv(DATASET_PATH, index=False)
+
+print("Dynamic data ingestion completed successfully.")
+print("New records added:", len(df_new))
+print("Total dataset size:", len(df_final))
+
